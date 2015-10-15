@@ -27,7 +27,7 @@ class Task(object):
     Upon completion, the `exitstatus` attribute is set to the exit status
     of the process.
     """
-    def __init__(self, host, port, user, cmd, opts, stdin=None):
+    def __init__(self, host, port, user, cmd, opts, stdin=None, name=None):
         self.opts = opts
         self.exitstatus = None
 
@@ -35,6 +35,7 @@ class Task(object):
         self.pretty_host = host
         self.port = port
         self.cmd = cmd
+        self.name = name
 
         if user != opts.user:
             self.pretty_host = '@'.join((user, self.pretty_host))
@@ -201,7 +202,7 @@ class Task(object):
                 if self.outfile:
                     self.writer.write(self.outfile, buf)
                 if self.print_out:
-                    sys.stdout.write('%s: %s' % (self.host, buf))
+                    sys.stdout.write('=================================  [%s]  ======================== \n %s' % (self.server_name, buf))
                     if buf[-1] != '\n':
                         sys.stdout.write('\n')
             else:
@@ -258,14 +259,15 @@ class Task(object):
         self.failures.append(exc)
 
 class SshTask(Task):
-    def __init__(self, host, port, user, cmd, raw_cmd, opts, stdin=None):
+    def __init__(self, host, port, user, cmd, raw_cmd, opts, stdin=None, name=None):
         self.raw_cmd = raw_cmd
-        super(SshTask, self).__init__(host, port, user, cmd, opts, stdin)
+        super(SshTask, self).__init__(host, port, user, cmd, opts, stdin, name)
 
     def get_data(self):
         return {
             'started': psshutil.convert_task_time(self.timestamp).isoformat(),
             'host': self.host,
+            'name': self.name,
             'command': self.raw_cmd,
             'stdout': self.outputbuffer,
             'stderr': self.errorbuffer,

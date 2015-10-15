@@ -49,9 +49,9 @@ def read_host_file(path, default_user=None, default_port=None):
         # Pull out the non-commented portion of the line
         # This allows entries with comments anywhere in the line
         line = line.split('#')[0].strip()
-        host, port, user = parse_host_entry(line, default_user, default_port)
+        host, port, user, name = parse_host_entry(line, default_user, default_port)
         if host:
-            hosts.append((host, port, user))
+            hosts.append((host, port, user, name))
     return list(set(hosts)) # uniquify host list
 
 
@@ -67,11 +67,11 @@ def parse_host_entry(line, default_user, default_port):
     """
     fields = line.split()
     if len(fields) == 0:
-        return None, None, None
-    if len(fields) > 2:
+        return None, None, None, None
+    if len(fields) > 3:
         sys.stderr.write('Bad line: "%s". Format should be'
                 ' [user@]host[:port] [user]\n' % line)
-        return None, None, None
+        return None, None, None, None
     host_field = fields[0]
     host, port, user = parse_host(host_field, default_port=default_port)
     if len(fields) == 2:
@@ -79,10 +79,22 @@ def parse_host_entry(line, default_user, default_port):
             user = fields[1]
         else:
             sys.stderr.write('User specified twice in line: "%s"\n' % line)
-            return None, None, None
+            return None, None, None, None
+    
+    name = None
+    if len(fields) == 3:
+        if name is None:
+            name = fields[2]
+        else:
+            sys.stderr.write('servar Name specified twice in line: "%s"\n' % line)
+            return server
+
+    if name is None:
+        name = host
+    
     if user is None:
         user = default_user
-    return host, port, user
+    return host, port, user, name
 
 
 def parse_host_string(host_string, default_user=None, default_port=None):

@@ -349,7 +349,7 @@ class SecureShellCLI(CLI):
             LOG.debug('script envelope is: %s' % cmdline)
             stdin = open(opts.script, 'r').read()
         manager = SshManager(opts)
-        for host, port, user in hosts:
+        for host, port, user, name in hosts:
             cmd = ['ssh', host, '-o', 'NumberOfPasswordPrompts=1',
                     '-o', 'SendEnv=PSSH_NODENUM']
             if opts.options:
@@ -363,7 +363,7 @@ class SecureShellCLI(CLI):
                 cmd.extend(opts.extra)
             if cmdline:
                 cmd.append(cmdline)
-            t = SshTask(host, port, user, cmd, cmdline, opts, stdin)
+            t = SshTask(host, port, user, cmd, cmdline, opts, stdin, name)
             manager.add_task(t)
         
         return manager
@@ -430,7 +430,7 @@ class SecureCopyCLI(CLI):
             print("Remote path %s must be an absolute path" % remote)
             sys.exit(3)
         manager = ScpManager(opts)
-        for host, port, user in hosts:
+        for host, port, user, name in hosts:
             cmd = ['scp', '-qC']
             if opts.options:
                 for opt in opts.options:
@@ -446,7 +446,7 @@ class SecureCopyCLI(CLI):
                 cmd.append('%s@%s:%s' % (user, host, remote))
             else:
                 cmd.append('%s:%s' % (host, remote))
-            t = Task(host, port, user, cmd, opts)
+            t = Task(host, port, user, cmd, opts, name)
             manager.add_task(t)
 
         return manager
@@ -494,7 +494,7 @@ class NukeCLI(CLI):
     def setup_manager(self, hosts, args, opts):
         pattern = args[0]
         manager = Manager(opts)
-        for host, port, user in hosts:
+        for host, port, user, name in hosts:
             cmd = ['ssh', host, '-o', 'NumberOfPasswordPrompts=1']
             if opts.options:
                 for opt in opts.options:
@@ -506,7 +506,7 @@ class NukeCLI(CLI):
             if opts.extra:
                 cmd.extend(opts.extra)
             cmd.append('pkill -9 %s' % pattern)
-            t = Task(host, port, user, cmd, opts)
+            t = Task(host, port, user, cmd, opts, name)
             manager.add_task(t)
         return manager
 
@@ -576,7 +576,7 @@ class RemoteSyncCLI(CLI):
             sys.exit(3)
 
         manager = ScpManager(opts)
-        for host, port, user in hosts:
+        for host, port, user, name in hosts:
             ssh = ['ssh']
             if opts.options:
                 for opt in opts.options:
@@ -602,7 +602,7 @@ class RemoteSyncCLI(CLI):
                 cmd.append('%s@%s:%s' % (user, host, remote))
             else:
                 cmd.append('%s:%s' % (host, remote))
-            t = Task(host, port, user, cmd, opts)
+            t = Task(host, port, user, cmd, opts, name)
             manager.add_task(t)
 
         return manager
@@ -680,7 +680,7 @@ class SecureReverseCopyCLI(CLI):
                 os.mkdir(dirname)
 
         manager = ScpManager(opts)
-        for host, port, user in hosts:
+        for host, port, user, name in hosts:
             if opts.localdir:
                 localpath = "%s/%s/%s" % (opts.localdir, host, local)
             else:
@@ -700,7 +700,7 @@ class SecureReverseCopyCLI(CLI):
             else:
                 cmd.append('%s:%s' % (host, remote))
             cmd.append(localpath)
-            t = Task(host, port, user, cmd, opts)
+            t = Task(host, port, user, cmd, opts, name)
             manager.add_task(t)
 
         return manager
