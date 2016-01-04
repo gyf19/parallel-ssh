@@ -202,7 +202,7 @@ class Task(object):
                 if self.outfile:
                     self.writer.write(self.outfile, buf)
                 if self.print_out:
-                    sys.stdout.write('=================================  [%s]  ======================== \n %s' % (self.server_name, buf))
+                    sys.stdout.write('=================================  [%s]  ======================== \n %s' % (self.name, buf))
                     if buf[-1] != '\n':
                         sys.stdout.write('\n')
             else:

@@ -671,7 +671,7 @@ class SecureReverseCopyCLI(CLI):
             print("Remote path %s must be an absolute path" % remote)
             sys.exit(3)
 
-        for host, port, user in hosts:
+        for host, port, user, name in hosts:
             if opts.localdir:
                 dirname = "%s/%s" % (opts.localdir, host)
             else:
